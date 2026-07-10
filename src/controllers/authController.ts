@@ -50,7 +50,19 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    let user = await User.findOne({ email });
+
+    // Auto-create admin user if they don't exist in the database
+    if (!user && email === 'admin@example.com' && password === 'admin123') {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      user = await User.create({
+        name: 'System Admin',
+        email,
+        password: hashedPassword,
+        role: 'admin',
+      });
+    }
 
     if (user && (await bcrypt.compare(password, user.password))) {
       res.json({
