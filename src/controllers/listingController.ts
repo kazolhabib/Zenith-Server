@@ -37,6 +37,8 @@ export const createListing = async (req: AuthRequest, res: Response): Promise<vo
   try {
     const { title, description, fullDescription, price, location, date, image } = req.body;
 
+    const defaultImage = image || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80';
+    
     const listing = new Listing({
       title,
       description,
@@ -44,7 +46,8 @@ export const createListing = async (req: AuthRequest, res: Response): Promise<vo
       price,
       location,
       date,
-      image: image || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+      image: defaultImage,
+      images: [defaultImage, defaultImage, defaultImage, defaultImage],
       user: req.user._id,
       rating: 0
     });

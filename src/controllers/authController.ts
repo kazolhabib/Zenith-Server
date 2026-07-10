@@ -63,3 +63,33 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const googleSignIn = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, name } = req.body;
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // Create user if they don't exist
+      const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(generatedPassword, salt);
+
+      user = await User.create({
+        name,
+        email,
+        password: hashedPassword,
+      });
+    }
+
+    res.json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      token: generateToken(user._id.toString()),
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};

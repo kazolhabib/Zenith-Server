@@ -9,6 +9,7 @@ const listingSchema = new mongoose.Schema(
     location: { type: String, required: true },
     date: { type: String, required: true },
     image: { type: String, required: true },
+    images: [{ type: String }],
     rating: { type: Number, default: 0 },
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
   },
@@ -21,7 +22,7 @@ const listingSchema = new mongoose.Schema(
 listingSchema.set('toJSON', {
   virtuals: true,
   versionKey: false,
-  transform: function (doc, ret) {
+  transform: function (doc, ret: any) {
     ret.id = ret._id;
     delete ret._id;
   }
