@@ -33,6 +33,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
         id: user._id,
         name: user.name,
         email: user.email,
+        image: user.image,
         token: generateToken(user._id.toString()),
       });
     } else {
@@ -54,6 +55,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
         id: user._id,
         name: user.name,
         email: user.email,
+        image: user.image,
         token: generateToken(user._id.toString()),
       });
     } else {
@@ -66,7 +68,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
 
 export const googleSignIn = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, name } = req.body;
+    const { email, name, image } = req.body;
 
     let user = await User.findOne({ email });
 
@@ -80,15 +82,46 @@ export const googleSignIn = async (req: Request, res: Response): Promise<void> =
         name,
         email,
         password: hashedPassword,
+        image: image || '',
       });
+    } else if (image && !user.image) {
+      // Update image if they logged in with Google but had no image previously
+      user.image = image;
+      await user.save();
     }
 
     res.json({
       id: user._id,
       name: user.name,
       email: user.email,
+      image: user.image,
       token: generateToken(user._id.toString()),
     });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateProfile = async (req: any, res: Response): Promise<void> => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+      user.name = req.body.name || user.name;
+      user.image = req.body.image || user.image;
+
+      const updatedUser = await user.save();
+
+      res.json({
+        id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        image: updatedUser.image,
+        token: generateToken(updatedUser._id.toString()),
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
