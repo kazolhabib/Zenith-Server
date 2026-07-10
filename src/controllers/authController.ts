@@ -104,13 +104,16 @@ export const googleSignIn = async (req: Request, res: Response): Promise<void> =
 
 export const updateProfile = async (req: any, res: Response): Promise<void> => {
   try {
+    console.log('Update profile API called. Body:', { name: req.body.name, imageLength: req.body.image ? req.body.image.length : 0 });
     const user = await User.findById(req.user._id);
 
     if (user) {
+      // Allow clearing the image by sending empty string
       user.name = req.body.name || user.name;
-      user.image = req.body.image || user.image;
+      user.image = req.body.image !== undefined ? req.body.image : user.image;
 
       const updatedUser = await user.save();
+      console.log('User updated successfully in DB. Image length:', updatedUser.image ? updatedUser.image.length : 0);
 
       res.json({
         id: updatedUser._id,
@@ -120,9 +123,11 @@ export const updateProfile = async (req: any, res: Response): Promise<void> => {
         token: generateToken(updatedUser._id.toString()),
       });
     } else {
+      console.log('User not found in DB:', req.user._id);
       res.status(404).json({ message: 'User not found' });
     }
   } catch (error: any) {
+    console.error('Error updating profile in DB:', error);
     res.status(500).json({ message: error.message });
   }
 };
