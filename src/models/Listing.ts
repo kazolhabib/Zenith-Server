@@ -10,7 +10,14 @@ const listingSchema = new mongoose.Schema(
     date: { type: String, required: true },
     image: { type: String, required: true },
     images: [{ type: String }],
+    specs: {
+      guests: { type: Number, default: 4 },
+      bedrooms: { type: Number, default: 2 },
+      beds: { type: Number, default: 2 },
+      baths: { type: Number, default: 1 }
+    },
     rating: { type: Number, default: 0 },
+    isManuallyCreated: { type: Boolean, default: false },
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
   },
   {

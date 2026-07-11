@@ -24,6 +24,11 @@ const userSchema = new mongoose.Schema(
       enum: ['user', 'admin'],
       default: 'user',
     },
+    membership: {
+      type: String,
+      enum: ['none', 'silver', 'gold', 'platinum'],
+      default: 'none',
+    },
   },
   {
     timestamps: true,
