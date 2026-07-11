@@ -41,7 +41,7 @@ export const createReservation = async (req: AuthRequest, res: Response): Promis
 // @access  Private
 export const getMyReservations = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const reservations = await Reservation.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const reservations = await Reservation.find({ user: req.user._id, status: { $ne: 'Cancelled' } }).sort({ createdAt: -1 });
     res.json(reservations);
   } catch (error: any) {
     console.error('Get my reservations error:', error);
