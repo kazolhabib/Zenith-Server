@@ -119,6 +119,48 @@ export const googleSignIn = async (req: Request, res: Response): Promise<void> =
   }
 };
 
+export const facebookSignIn = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, name, image } = req.body;
+
+    let userEmail = email;
+    if (!userEmail) {
+      const cleanName = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      userEmail = `${cleanName || 'fbuser'}-${Math.random().toString(36).substring(2, 7)}@facebook.com`;
+    }
+
+    let user = await User.findOne({ email: userEmail });
+
+    if (!user) {
+      const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(generatedPassword, salt);
+
+      user = await User.create({
+        name,
+        email: userEmail,
+        password: hashedPassword,
+        image: image || '',
+        role: 'user',
+      });
+    } else if (image && !user.image) {
+      user.image = image;
+      await user.save();
+    }
+
+    res.json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      image: user.image,
+      role: user.role,
+      token: generateToken(user._id.toString()),
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const updateProfile = async (req: any, res: Response): Promise<void> => {
   try {
     console.log('Update profile API called. Body:', { name: req.body.name, imageLength: req.body.image ? req.body.image.length : 0 });
